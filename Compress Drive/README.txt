@@ -1,5 +1,5 @@
 Compress Drive
-Quinn Knowles, Page Schiefer
+Quinn Knowles, Paige Schiele
 
 Requirements 
 	Python
