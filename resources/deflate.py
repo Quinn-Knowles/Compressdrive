@@ -2,25 +2,7 @@ import os
 import sys
 import time
 import subprocess
-import deflate
 
-def compress(filepath):
-    level = 6  # Compression level (usually 1-12 for libdeflate)
-    with open(filepath, "rb") as file:
-        data = file.read()
-    
-    # DEFLATE compression (raw)
-    compressed_deflate = deflate.deflate_compress(data, level)
-    
-    # zlib compression
-    compressed_zlib = deflate.zlib_compress(data, level)
-
-    # Write zlib-compressed data to a file
-    out_path = filepath + ".zlib"
-    with open(out_path, "wb") as file:
-        file.write(compressed_zlib)
-    
-    print(f"Compressed (zlib) file written to: {out_path}")
 
 def compress_with_7zip(filepath):
     start_time = time.time()
@@ -44,5 +26,4 @@ if __name__ == "__main__":
         sys.exit(1)
 
     file_path = sys.argv[1]
-    compress(file_path)
     compress_with_7zip(file_path)

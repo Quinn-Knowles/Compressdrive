@@ -1,6 +1,16 @@
 import os
 import sys
-import subprocess
+import gzip
+import math
+
+
+"""
+input: target file directory , target ratio
+output: percent of files likely to compress
+
+script goal 1: create an idea of how many files in target directory will compress below target 
+"""
+
 
 # Known file signatures for formats that include compression
 COMPRESSED_SIGNATURES = {
@@ -107,21 +117,43 @@ def test_compression_ratio(file_path):
     except Exception as e:
         return None
 
-def process_directory(directory, ratio):
+def process_directory(directory, target_ratio):
     """Recursively process all files in the given directory."""
     total_files = 0
     probable_success = 0
     for root, _, files in os.walk(directory):
         for file in files:
-            total_files += 1
             file_path = os.path.join(root, file)
-            result = subprocess.run([sys.executable, "resources/identifier.py", file_path, str(ratio)], capture_output=True)
-            if result.returncode == 0:  # Assuming a successful return means a file with compression ratio below target
+            total_files += 1
+            result = analyze_file(file_path, target_ratio)
+            if result == 1:  # Assuming a successful return means a file with compression ratio below target
                 probable_success += 1
     if total_files == 0:
         return 0
     return (probable_success / total_files) * 100
 
+
+def analyze_file(file_path, target_ratio):
+    """Checks if a file is compressed and whether it should be compressed further."""
+    #print(f"\nAnalyzing: {file_path}")
+    if not os.path.isfile(file_path):
+        print("Error: File not found.")
+        return 0  # Return 0 to handle error cases
+
+    compressed = is_compressed(file_path)
+    entropy = calculate_entropy(file_path)
+    compression_ratio = test_compression_ratio(file_path)
+
+    if compression_ratio is None:
+        return 0  # If compression ratio cannot be calculated, return 0
+    
+    if compression_ratio > target_ratio and entropy > 7.5:
+        return 0  # File is already well compressed
+    elif compression_ratio < target_ratio:
+        return 1  # File can likely be compressed further
+    else:
+        return -1  # File might be compressible, but gains will be small
+        
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("Usage: python identifier.py <directory_path> <target_ratio>")
