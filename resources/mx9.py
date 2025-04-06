@@ -4,17 +4,16 @@ import subprocess
 
 
 def compress_with_7zip(filepath):
-    output_file = filepath + ".deflate.7z"
+    output_file = filepath + ".mx9.7z"
     
     # Run 7zip with DEFLATE
-    cmd = ['7z', 'a', output_file, filepath, '-m1=Deflate']
+    cmd = ['7z', 'a', output_file, filepath, '-mx9']
     subprocess.run(cmd)
     
-    size = os.path.getsize(output_file)
     
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python deflate_test.py <file_path>")
+        print("Usage: python mx9.py <file_path>")
         sys.exit(1)
 
     file_path = sys.argv[1]

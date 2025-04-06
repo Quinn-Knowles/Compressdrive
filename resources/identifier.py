@@ -1,7 +1,5 @@
 import os
 import sys
-import gzip
-import math
 
 # Known file signatures for formats that include compression
 COMPRESSED_SIGNATURES = {
@@ -42,6 +40,9 @@ COMPRESSED_SIGNATURES = {
     b'\x52\x5A\x44\x31': 'VHDX (compressed virtual disk)'
 }
 
+# Allowed compressed file extensions
+COMPRESSED_EXTENSIONS = ['.zip', '.7z', '.rar', '.gz']
+
 def get_file_signature(file_path, num_bytes=8):
     """Reads the first few bytes of a file to determine its magic number."""
     try:
@@ -52,10 +53,16 @@ def get_file_signature(file_path, num_bytes=8):
         return None
 
 def is_compressed(file_path):
-    """Determines if a file is compressed based on its signature."""
+    """Determines if a file is compressed based on its signature or extension."""
     if not os.path.isfile(file_path):
         print(f"File not found: {file_path}")
         return False
+
+    # Check file extension
+    file_extension = os.path.splitext(file_path)[1].lower()
+    if file_extension in COMPRESSED_EXTENSIONS:
+        print(f"File is compressed based on extension: {file_extension}")
+        return True
 
     # Read file signature
     signature = get_file_signature(file_path)
@@ -65,81 +72,28 @@ def is_compressed(file_path):
     # Check if the signature matches any known compressed format
     for magic, file_type in COMPRESSED_SIGNATURES.items():
         if signature.startswith(magic):
-            #print(f"File is likely compressed: {file_type}")
+            print(f"File is likely compressed as: {file_type}")
             return True
 
-    #print("File does not appear to be compressed.")
+    print("File does not appear to be compressed.")
     return False
 
-def calculate_entropy(file_path):
-    """Calculates Shannon entropy to determine randomness."""
-    try:
-        with open(file_path, 'rb') as f:
-            data = f.read()
-
-        if not data:
-            return 0  # Empty file has zero entropy
-
-        byte_counts = [0] * 256
-        for byte in data:
-            byte_counts[byte] += 1
-
-        total_bytes = len(data)
-        entropy = -sum((count / total_bytes) * math.log2(count / total_bytes) for count in byte_counts if count > 0)
-        return entropy
-    except Exception as e:
-        print(f"Error calculating entropy: {e}")
-        return None
-
-def test_compression_ratio(file_path):
-    """Attempts gzip compression to estimate how much smaller the file can get."""
-    try:
-        original_size = os.path.getsize(file_path)
-        if original_size == 0:
-            return 1.0  # Empty files are already "fully compressed"
-
-        compressed_path = file_path + ".gz"
-        with open(file_path, 'rb') as f_in, gzip.open(compressed_path, 'wb') as f_out:
-            f_out.writelines(f_in)
-
-        compressed_size = os.path.getsize(compressed_path)
-        os.remove(compressed_path)  # Clean up temporary file
-
-        compression_ratio = compressed_size / original_size
-        return compression_ratio
-    except Exception as e:
-        #print(f"Error testing compression ratio: {e}")
-        return None
-
-def analyze_file(file_path, target_ratio):
-    """Checks if a file is compressed and whether it should be compressed further."""
-    #print(f"\nAnalyzing: {file_path}")
+def analyze_file(file_path):
+    """Checks if a file is compressed based on its signature or extension."""
     if not os.path.isfile(file_path):
         print("Error: File not found.")
         return
 
     compressed = is_compressed(file_path)
-    entropy = calculate_entropy(file_path)
-    compression_ratio = test_compression_ratio(file_path)
-
-    #print(f"Shannon Entropy: {entropy:.2f} bits/byte (Max: 8.0)")
-    #print(f"Estimated Compression Ratio (Gzip): {compression_ratio:.2f}")
-
-    if compression_ratio > target_ratio and entropy > 7.5:
-        #print("File is already well compressed. Further compression won't help.")
+    if compressed:
         print(0)
-    elif compression_ratio < target_ratio:
-        #print("This file can likely be compressed further.")
-        print(1)
     else:
-        #print("The file might be compressible, but gains will be small.")
-        x=1
+        print(1)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python identifier.py <file_path> <ratio>")
+        print("Usage: python identifier.py <file_path>")
         sys.exit(1)
 
     file_path = sys.argv[1]
-    ratio = float(sys.argv[2]) / 100
-    analyze_file(file_path, ratio)
+    analyze_file(file_path)

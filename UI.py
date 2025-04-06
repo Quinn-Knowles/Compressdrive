@@ -31,7 +31,7 @@ class MyFrame(wx.Frame):
         self.radio1 = wx.RadioButton(panel, label="Individual", pos=(50, 150), style=wx.RB_GROUP)
         self.radio2 = wx.RadioButton(panel, label="Top level", pos=(150, 150))
         self.radio3 = wx.RadioButton(panel, label="Try all", pos=(250, 150))
-        self.radio4 = wx.RadioButton(panel, label="Option 4", pos=(350, 150))
+        self.radio4 = wx.RadioButton(panel, label="Test Bench", pos=(350, 150))
 
         self.Show()
 
@@ -59,15 +59,13 @@ class MyFrame(wx.Frame):
         elif self.radio3.GetValue():
             script_name = "control/tryall.py"
         elif self.radio4.GetValue():
-            script_name = "control/option4.py"
+            script_name = "control/testbench.py"
         else:
             wx.MessageBox("Please select an option.", "Error", wx.OK | wx.ICON_ERROR)
             return
-
-        # Pass the custom argument to the script if it's provided
         command = ["python", script_name, selected_directory]
         if ratio_target:
-            command.append(ratio_target)  # Add the custom argument to the command
+            command.append(ratio_target)  
 
         try:
             subprocess.run(command, check=True)
@@ -80,7 +78,7 @@ class MyFrame(wx.Frame):
     def on_pre_check(self, event):
         """Calls the appropriate Python script based on the selected radio button."""
         selected_directory = self.text_ctrl.GetValue()
-        ratio_target = self.custom_text_ctrl.GetValue()  # Get the custom argument text
+        ratio_target = self.custom_text_ctrl.GetValue()  
         
         
         if not ratio_target:
@@ -92,7 +90,6 @@ class MyFrame(wx.Frame):
         
         script_name = "control/precheck.py"
 
-        # Pass the custom argument to the script if it's provided
         command = ["python", script_name, selected_directory, ratio_target]
         try:
             info = subprocess.run(command, check=True, encoding='utf-8', stdout=subprocess.PIPE)
