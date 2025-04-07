@@ -20,6 +20,8 @@ Before using this program, ensure that you have the following:
 
     Python 3.x: The program is written in Python, so you’ll need Python 3.x installed.
 
+    7zip is relied on for 3/5 of the current implemented compression techniques, so thats a must as well.
+
     Required Libraries: The program uses several Python libraries, including os, sys, subprocess, and time. These libraries come pre-installed with Python, so no additional installation is required.
 
     Compression Scripts: The program relies on external compression scripts, namely:
