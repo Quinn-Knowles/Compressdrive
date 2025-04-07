@@ -5,8 +5,7 @@ import subprocess
 
 def compress_with_7zip(filepath):
     output_file = filepath + ".ppmd.7z"
-    
-    # Run 7zip with DEFLATE
+    # Run 7zip with PPMD
     cmd = ['7z', 'a', output_file, filepath, '-m1=PPMd']
     subprocess.run(cmd)
     

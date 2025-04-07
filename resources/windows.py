@@ -5,8 +5,7 @@ import subprocess
 
 def compress_with_windows(filepath):
     output_file = filepath + ".win.zip"
-    
-    # Run 7zip with DEFLATE
+    #use powershell to run native windows compression
     cmd = ['powershell', '-Command', f'Compress-Archive -Path "{filepath}" -DestinationPath "{output_file}"']
     subprocess.run(cmd)
     

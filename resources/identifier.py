@@ -1,7 +1,6 @@
 import os
 import sys
-
-# Known file signatures for formats that include compression
+#unused
 COMPRESSED_SIGNATURES = {
     # Archive & Compression Formats
     b'\x50\x4B\x03\x04': 'ZIP / DOCX / XLSX / PPTX / JAR / APK',  
@@ -40,7 +39,6 @@ COMPRESSED_SIGNATURES = {
     b'\x52\x5A\x44\x31': 'VHDX (compressed virtual disk)'
 }
 
-# Allowed compressed file extensions
 COMPRESSED_EXTENSIONS = ['.zip', '.7z', '.rar', '.gz']
 
 def get_file_signature(file_path, num_bytes=8):
@@ -58,18 +56,15 @@ def is_compressed(file_path):
         print(f"File not found: {file_path}")
         return False
 
-    # Check file extension
     file_extension = os.path.splitext(file_path)[1].lower()
     if file_extension in COMPRESSED_EXTENSIONS:
         print(f"File is compressed based on extension: {file_extension}")
         return True
 
-    # Read file signature
     signature = get_file_signature(file_path)
     if not signature:
         return False
 
-    # Check if the signature matches any known compressed format
     for magic, file_type in COMPRESSED_SIGNATURES.items():
         if signature.startswith(magic):
             print(f"File is likely compressed as: {file_type}")

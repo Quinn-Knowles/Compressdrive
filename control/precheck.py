@@ -12,7 +12,6 @@ script goal 1: create an idea of how many files in target directory will compres
 """
 
 
-# Known file signatures for formats that include compression
 COMPRESSED_SIGNATURES = {
     # Archive & Compression Formats
     b'\x50\x4B\x03\x04': 'ZIP / DOCX / XLSX / PPTX / JAR / APK',  
@@ -51,8 +50,13 @@ COMPRESSED_SIGNATURES = {
     b'\x52\x5A\x44\x31': 'VHDX (compressed virtual disk)'
 }
 
+
+
+"""
+input: file, header bytes to read
+output: extracted bytes
+"""
 def get_file_signature(file_path, num_bytes=8):
-    """Reads the first few bytes of a file to determine its magic number."""
     try:
         with open(file_path, 'rb') as f:
             return f.read(num_bytes)
@@ -60,46 +64,61 @@ def get_file_signature(file_path, num_bytes=8):
         print(f"Error reading file: {e}")
         return None
 
+
+"""
+input: file, header bytes to read
+output: extracted bytes
+"""
 def is_compressed(file_path):
-    """Determines if a file is compressed based on its signature."""
     if not os.path.isfile(file_path):
         print(f"File not found: {file_path}")
         return False
 
-    # Read file signature
-    signature = get_file_signature(file_path)
+    signature = get_file_signature(file_path)                           #not seeing a listed signature,  might not be compressed
     if not signature:
         return False
 
-    # Check if the signature matches any known compressed format
-    for magic, file_type in COMPRESSED_SIGNATURES.items():
-        if signature.startswith(magic):
+    for known_signatures, file_type in COMPRESSED_SIGNATURES.items():   #seeing a known signature, certain to be compressed
+        if signature.startswith(known_signatures):
             return True
 
     return False
 
+
+
+
+"""
+input: file
+output: mathematics 
+goal: give an idea of what randomness is contained
+note: expected results will need to be updated as data is forthcoming
+"""
 def calculate_entropy(file_path):
-    """Calculates Shannon entropy to determine randomness."""
     try:
         with open(file_path, 'rb') as f:
             data = f.read()
 
         if not data:
-            return 0  # Empty file has zero entropy
+            return 0  
 
         byte_counts = [0] * 256
         for byte in data:
             byte_counts[byte] += 1
 
         total_bytes = len(data)
-        entropy = -sum((count / total_bytes) * math.log2(count / total_bytes) for count in byte_counts if count > 0)
+        entropy = -sum((count / total_bytes) * math.log2(count / total_bytes) for count in byte_counts if count > 0) #gives a sense of randomness contained in files
         return entropy
     except Exception as e:
         print(f"Error calculating entropy: {e}")
         return None
 
+
+
+"""
+input: file
+output: basic compression ratio based on gzip
+"""
 def test_compression_ratio(file_path):
-    """Attempts gzip compression to estimate how much smaller the file can get."""
     try:
         original_size = os.path.getsize(file_path)
         if original_size == 0:
@@ -117,25 +136,17 @@ def test_compression_ratio(file_path):
     except Exception as e:
         return None
 
-def process_directory(directory, target_ratio):
-    """Recursively process all files in the given directory."""
-    total_files = 0
-    probable_success = 0
-    for root, _, files in os.walk(directory):
-        for file in files:
-            file_path = os.path.join(root, file)
-            total_files += 1
-            result = analyze_file(file_path, target_ratio)
-            if result == 1:  # Assuming a successful return means a file with compression ratio below target
-                probable_success += 1
-    if total_files == 0:
-        return 0
-    return (probable_success / total_files) * 100
 
 
+
+
+
+"""
+Input: file path, target ratio
+output: yes/no on if we think it can be compressed to reach desire
+script goal 1: pass file off to above tests
+"""
 def analyze_file(file_path, target_ratio):
-    """Checks if a file is compressed and whether it should be compressed further."""
-    #print(f"\nAnalyzing: {file_path}")
     if not os.path.isfile(file_path):
         print("Error: File not found.")
         return 0  # Return 0 to handle error cases
@@ -145,7 +156,7 @@ def analyze_file(file_path, target_ratio):
     compression_ratio = test_compression_ratio(file_path)
 
     if compression_ratio is None:
-        return 0  # If compression ratio cannot be calculated, return 0
+        return 0  
     
     if compression_ratio > target_ratio and entropy > 7.5:
         return 0  # File is already well compressed
@@ -153,12 +164,31 @@ def analyze_file(file_path, target_ratio):
         return 1  # File can likely be compressed further
     else:
         return -1  # File might be compressible, but gains will be small
-        
+
+"""
+Input: directory,  ratio
+output: -
+script goal 1: pass individual files off to above tests
+"""
+def process_directory(directory, target_ratio):
+    total_files = 0
+    probable_success = 0
+    for root, _, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            total_files += 1
+            result = analyze_file(file_path, target_ratio)
+            if result == 1: 
+                probable_success += 1
+    if total_files == 0:
+        return 0
+    return (probable_success / total_files) * 100
+       
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 3: #must have correct arguments 
         print("Usage: python identifier.py <directory_path> <target_ratio>")
         sys.exit(1)
 
-    target_ratio = float(sys.argv[2]) / 100
+    target_ratio = float(sys.argv[2]) / 100 #UI passes an int not a float. who asks their user to input a float?
     percentage = process_directory(sys.argv[1], target_ratio)
     print(f"{percentage:.2f}% of files are likely to compress below target.")

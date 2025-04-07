@@ -4,7 +4,7 @@ import os
 
 def compress_with_lzma(filepath):
     output_file = filepath + ".xz"
-
+    # Run py module LZMA
     with open(filepath, "rb") as f:
         data = f.read()
     with lzma.open(output_file, "w") as f:

@@ -9,11 +9,17 @@ option: target ratio
 output: _
 
 script goal 1: run all compression scripts from resourcess folder on all folders in target directory.
-???stretch??? script goal 2: if leaf files are present in target directory, compress them to a single file
+script goal 2: if leaf files are present in target directory, compress them to a single file                //not implemented
 script goal 3: if ratio is provided only keep leaf files under that ratio
 script goal 4: if a file is under the target ratio, keep the result thats smallest. 
 """
 
+
+"""
+Input: folder path
+output: size of all items in the folder
+script goal 1: use os.path.getsize for all leaf nodes
+"""
 def get_folder_size(folder_path):
     total_size = 0
     for item in os.listdir(folder_path):
@@ -26,8 +32,14 @@ def get_folder_size(folder_path):
     
     
 
+"""
+Input: folder path
+output: -
+goal 1: run given folder through all algorithms 
+goal 2: keep best version
+"""
 def process_folder(folder_path):
-    """Compress a folder using multiple algorithms and keep the best result."""
+    #define implemented algorithms
     deflate = ["resources/deflate.py", ".deflate.7z"]
     PPMD = ["resources/ppmd.py", ".ppmd.7z"]
     mx9 = ["resources/mx9.py", ".mx9.7z"]
@@ -52,7 +64,6 @@ def process_folder(folder_path):
                 os.remove(output_path)
 
     if best_output:
-        # Rename best to .7z for consistency
         final_output = folder_path + ".7z"
         os.rename(best_output, final_output)
         try:
@@ -65,7 +76,6 @@ def process_folder(folder_path):
 
 
 def process_directory(directory, ratio):
-    """Process all top-level folders in the given directory."""
     for entry in os.listdir(directory):
         folder_path = os.path.join(directory, entry)
         if os.path.isdir(folder_path):

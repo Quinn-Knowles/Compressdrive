@@ -5,8 +5,7 @@ import subprocess
 
 def compress_with_7zip(filepath):
     output_file = filepath + ".mx9.7z"
-    
-    # Run 7zip with DEFLATE
+    # Run 7zip with mx9
     cmd = ['7z', 'a', output_file, filepath, '-mx9']
     subprocess.run(cmd)
     
