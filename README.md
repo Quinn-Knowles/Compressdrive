@@ -25,8 +25,8 @@ Before using this program, ensure that you have the following:
     Required Libraries: The program uses several Python libraries, including os, sys, subprocess, and time. These libraries come pre-installed with Python, so no additional installation is required.
 
     Compression Scripts: The program relies on external compression scripts, namely:
-		7zip
-		Python LZMA
+	7zip
+	Python LZMA
         windows powershell (for Windows Compression)
 		
 Acknowledgments
